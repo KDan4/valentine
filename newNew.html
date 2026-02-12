@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Valentine?</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      background: #fff0f6;
+    }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 28px 22px;
+      width: min(520px, 92vw);
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    h1 { margin: 0 0 10px; font-size: 28px; }
+    p { margin: 0 0 20px; opacity: .8; }
+
+    .stage {
+      position: relative;
+      height: 220px;
+      border-radius: 14px;
+      background: #fff7fb;
+      border: 1px dashed rgba(0,0,0,.15);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform .08s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn:active { transform: scale(.98); }
+
+    #yesBtn { background: #ff4d8d; color: white; margin-right: 10px; }
+    #noBtn  { background: #f1f3f5; color: #222; position: absolute; }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .message {
+      margin-top: 18px;
+      padding: 14px 14px;
+      border-radius: 14px;
+      background: #e6fffa;
+      border: 1px solid rgba(0,0,0,.08);
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Will you be my valentine? 💝</h1>
+    <p>Choose wisely 😄</p>
+
+    <div class="stage" id="stage">
+      <div class="row">
+        <button class="btn" id="yesBtn">Yes</button>
+        <!-- "No" is positioned absolutely so it can move -->
+        <button class="btn" id="noBtn">No</button>
+      </div>
+    </div>
+
+    <div class="message" id="msg">
+      🎉 Yay!! I’m so happy! 💖<br/>
+      (Now screenshot this and send it to me 😌)
+    </div>
+  </div>
+
+  <script>
+    const stage = document.getElementById('stage');
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const msg = document.getElementById('msg');
+
+    // Place the "No" button somewhere to start
+    function randomPos() {
+      const s = stage.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+
+      const padding = 10;
+      const maxX = s.width - b.width - padding;
+      const maxY = s.height - b.height - padding;
+
+      const x = padding + Math.random() * Math.max(0, maxX - padding);
+      const y = padding + Math.random() * Math.max(0, maxY - padding);
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+    }
+
+    // Distance helper
+    function dist(ax, ay, bx, by) {
+      return Math.hypot(ax - bx, ay - by);
+    }
+
+    // Make "No" dodge when pointer gets close
+    function dodge(clientX, clientY) {
+      const s = stage.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+
+      const btnCenterX = b.left + b.width / 2;
+      const btnCenterY = b.top  + b.height / 2;
+
+      // If pointer is within this radius, move
+      const radius = 90;
+
+      if (dist(clientX, clientY, btnCenterX, btnCenterY) < radius) {
+        randomPos();
+      }
+    }
+
+    // Mouse + touch support
+    stage.addEventListener('mousemove', (e) => dodge(e.clientX, e.clientY));
+    stage.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      if (t) dodge(t.clientX, t.clientY);
+    }, { passive: true });
+
+    // If "No" is clicked or tapped, make it disappear and leave only "Yes"
+    noBtn.addEventListener('click', () => {
+      noBtn.remove();
+    });
+
+    // If "Yes" is clicked, show the message
+    yesBtn.addEventListener('click', () => {
+      msg.style.display = 'block';
+      yesBtn.textContent = "Yes ✅";
+      yesBtn.disabled = true;
+      yesBtn.style.opacity = 0.85;
+    });
+
+    // Initial placement after layout
+    window.addEventListener('load', randomPos);
+    window.addEventListener('resize', randomPos);
+  </script>
+</body>
+</html>
